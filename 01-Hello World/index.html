@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koerting Institute – Hello World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #151A1D;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        .hello {
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2rem;
+            letter-spacing: 0.02em;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hello span {
+            display: inline-block;
+            transition: transform 0.3s ease, color 0.2s ease, opacity 0.3s ease;
+            text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
+        }
+
+        .hello span.dance { animation: dance 0.5s ease-in-out infinite alternate; }
+        .hello span.pulse { animation: pulse 0.6s ease-in-out infinite alternate; }
+        .hello span.wave { animation: wave 1s ease-in-out infinite; }
+        .hello span.shake { animation: shake 0.3s ease-in-out infinite; }
+        .hello span.flip { animation: flip 0.8s ease-in-out infinite; }
+        .hello span.glitch { animation: glitch 0.2s steps(2) infinite; }
+        .hello span.bounce { animation: bounce 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite; }
+
+        @keyframes dance {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(5px) rotate(3deg); }
+            100% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(0.9); }
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-25px); }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-5px) rotate(-3deg); }
+            50% { transform: translateX(5px) rotate(3deg); }
+            75% { transform: translateX(-3px) rotate(-1deg); }
+            100% { transform: translateX(3px) rotate(1deg); }
+        }
+
+        @keyframes flip {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); text-shadow: -2px 0 #E7017F, 2px 0 #c4d600, 0 0 10px currentColor; }
+            25% { transform: translate(3px, -2px); text-shadow: 2px 0 #E7017F, -2px 0 #c4d600, 0 0 10px currentColor; }
+            50% { transform: translate(-2px, 1px); text-shadow: -2px 2px #E7017F, 2px -2px #c4d600, 0 0 10px currentColor; }
+            75% { transform: translate(1px, 3px); text-shadow: 2px -2px #E7017F, -1px 2px #c4d600, 0 0 10px currentColor; }
+            100% { transform: translate(-1px, -1px); text-shadow: -1px 1px #E7017F, 1px -1px #c4d600, 0 0 10px currentColor; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            30% { transform: translateY(60px); }
+            50% { transform: translateY(-10px); }
+            70% { transform: translateY(30px); }
+            85% { transform: translateY(-5px); }
+        }
+
+        .btn {
+            background-color: #c4d600;
+            color: #151A1D;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn:active {
+            background-color: #E7017F;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: clamp(0.8rem, 2vw, 1.2rem);
+            color: #ABAEB0;
+            letter-spacing: 0.15em;
+            margin-bottom: 2.5rem;
+            z-index: 2;
+            font-weight: 300;
+        }
+
+        .effect-label {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: #ABAEB0;
+            z-index: 2;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            transition: opacity 0.3s ease;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .bg-glow.active {
+            opacity: 1;
+        }
+
+        .matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .matrix-canvas.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow" id="bgGlow"></div>
+    <canvas class="matrix-canvas" id="matrixCanvas"></canvas>
+    <canvas id="particles"></canvas>
+    <div class="hello" id="hello"></div>
+    <div class="subtitle">Industrial Engineering &nbsp;|&nbsp; Python &nbsp;|&nbsp; Data &nbsp;|&nbsp; Automation</div>
+    <button class="btn" onclick="triggerEffect()">Farbe wechseln</button>
+    <div class="effect-label" id="effectLabel"></div>
+
+    <script>
+        const text = "bavarian-dataforge";
+        const container = document.getElementById("hello");
+        const colors = ["#c4d600", "#ffffff", "#ABAEB0"];
+        let colorInterval = null;
+        let offset = 0;
+
+        const canvas = document.getElementById("particles");
+        const ctx = canvas.getContext("2d");
+        let particles = [];
+
+        const matrixCanvas = document.getElementById("matrixCanvas");
+        const mCtx = matrixCanvas.getContext("2d");
+        let matrixInterval = null;
+
+        const bgGlow = document.getElementById("bgGlow");
+        const effectLabel = document.getElementById("effectLabel");
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        text.split("").forEach(char => {
+            const span = document.createElement("span");
+            span.textContent = char;
+            container.appendChild(span);
+        });
+
+        function resetAll() {
+            if (colorInterval) { clearInterval(colorInterval); colorInterval = null; }
+            if (matrixInterval) { clearInterval(matrixInterval); matrixInterval = null; }
+            matrixCanvas.classList.remove("active");
+            bgGlow.classList.remove("active");
+            mCtx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            const spans = container.querySelectorAll("span");
+            spans.forEach(span => {
+                span.className = "";
+                span.style.transform = "";
+                span.style.animationDelay = "";
+                span.style.opacity = "1";
+                span.style.color = "#fff";
+            });
+        }
+
+        // 1: Regenbogen + Tanzen
+        function effectRainbowDance() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.className = "dance";
+                span.style.animationDelay = (i * 0.08) + "s";
+            });
+            offset = 0;
+            colorInterval = setInterval(() => {
+                spans.forEach((span, i) => {
+                    span.style.color = colors[(i + offset) % colors.length];
+                });
+                offset++;
+            }, 150);
+            return "Regenbogen + Tanzen";
+        }
+
+        // 2: Partikel-Explosion
+        function effectParticles() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                span.className = "pulse";
+                span.style.animationDelay = (i * 0.05) + "s";
+            });
+            spawnParticles(8);
+            animateParticles();
+            return "Partikel-Explosion";
+        }
+
+        // 3: Welle
+        function effectWave() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.className = "wave";
+                span.style.animationDelay = (i * 0.1) + "s";
+                span.style.color = colors[i % colors.length];
+            });
+            return "Welle";
+        }
+
+        // 4: Erdbeben
+        function effectShake() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.className = "shake";
+                span.style.animationDelay = (i * 0.03) + "s";
+                span.style.color = colors[Math.floor(Math.random() * colors.length)];
+            });
+            spawnParticles(4);
+            animateParticles();
+            return "Erdbeben";
+        }
+
+        // 5: 3D-Flip + Nordlicht
+        function effectFlipGlow() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.className = "flip";
+                span.style.animationDelay = (i * 0.12) + "s";
+                span.style.color = colors[i % colors.length];
+            });
+            const c1 = colors[Math.floor(Math.random() * 3)];
+            const c2 = colors[Math.floor(Math.random() * 3)];
+            bgGlow.style.background = `radial-gradient(ellipse at 50% 50%, ${c1}15 0%, ${c2}08 50%, transparent 80%)`;
+            bgGlow.classList.add("active");
+            setTimeout(() => bgGlow.classList.remove("active"), 3000);
+            return "3D-Flip + Nordlicht";
+        }
+
+        // 6: Equalizer
+        function effectEqualizer() {
+            const spans = container.querySelectorAll("span");
+            colorInterval = setInterval(() => {
+                spans.forEach(span => {
+                    const y = Math.random() * -30;
+                    const scale = 0.8 + Math.random() * 0.6;
+                    span.style.transform = `translateY(${y}px) scaleY(${scale})`;
+                    span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                });
+            }, 100);
+            return "Equalizer";
+        }
+
+        // 7: Glitch
+        function effectGlitch() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.className = "glitch";
+                span.style.animationDelay = (Math.random() * 0.3) + "s";
+                span.style.color = colors[Math.floor(Math.random() * colors.length)];
+            });
+            colorInterval = setInterval(() => {
+                spans.forEach(span => {
+                    if (Math.random() > 0.7) {
+                        span.style.opacity = (Math.random() * 0.5 + 0.5).toString();
+                        span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    }
+                });
+            }, 80);
+            return "Glitch";
+        }
+
+        // 8: Matrix Rain
+        function effectMatrix() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.style.color = "#c4d600";
+                span.className = "wave";
+                span.style.animationDelay = (i * 0.08) + "s";
+            });
+            matrixCanvas.classList.add("active");
+            const columns = Math.floor(matrixCanvas.width / 16);
+            const drops = Array(columns).fill(0);
+            const chars = "01アイウエオカキクケコサシスセソ";
+            matrixInterval = setInterval(() => {
+                mCtx.fillStyle = "rgba(21, 26, 29, 0.1)";
+                mCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+                mCtx.fillStyle = "#c4d600";
+                mCtx.font = "14px monospace";
+                mCtx.shadowBlur = 5;
+                mCtx.shadowColor = "#c4d600";
+                for (let i = 0; i < drops.length; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    mCtx.fillText(char, i * 16, drops[i] * 16);
+                    if (drops[i] * 16 > matrixCanvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+                mCtx.shadowBlur = 0;
+            }, 50);
+            return "Matrix Rain";
+        }
+
+        // 9: Gravity Drop
+        function effectGravityDrop() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                span.className = "bounce";
+                span.style.animationDelay = (i * 0.1) + "s";
+            });
+            spawnParticles(3);
+            animateParticles();
+            return "Gravity Drop";
+        }
+
+        // 10: Schreibmaschine
+        function effectTypewriter() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach(span => {
+                span.style.opacity = "0";
+                span.style.color = "#c4d600";
+            });
+            let idx = 0;
+            colorInterval = setInterval(() => {
+                if (idx < spans.length) {
+                    spans[idx].style.opacity = "1";
+                    spans[idx].style.transform = "scale(1.2)";
+                    setTimeout(() => { spans[idx - 1] && (spans[idx - 1].style.transform = "scale(1)"); }, 100);
+                    idx++;
+                } else {
+                    clearInterval(colorInterval);
+                    colorInterval = setInterval(() => {
+                        spans.forEach(span => {
+                            span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                        });
+                    }, 300);
+                }
+            }, 120);
+            return "Schreibmaschine";
+        }
+
+        // 11: Domino
+        function effectDomino() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.style.color = colors[i % colors.length];
+                setTimeout(() => {
+                    span.style.transform = "rotateZ(90deg) translateY(10px)";
+                    setTimeout(() => {
+                        span.style.transform = "rotateZ(0deg) translateY(0)";
+                    }, 300);
+                }, i * 120);
+            });
+            return "Domino";
+        }
+
+        // 12: Magnetisch
+        function effectMagnetic() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                const dir = (i - spans.length / 2) * 40;
+                span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                span.style.transform = `translateX(${dir}px) rotate(${dir / 3}deg)`;
+                span.style.opacity = "0.5";
+            });
+            setTimeout(() => {
+                spans.forEach(span => {
+                    span.style.transform = "translateX(0) rotate(0deg)";
+                    span.style.opacity = "1";
+                });
+                spawnParticles(5);
+                animateParticles();
+            }, 600);
+            colorInterval = setInterval(() => {
+                spans.forEach(span => {
+                    span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                });
+            }, 400);
+            return "Magnetisch";
+        }
+
+        // 13: Feuerwerk
+        function effectFirework() {
+            const spans = container.querySelectorAll("span");
+            spans.forEach((span, i) => {
+                span.style.color = colors[i % colors.length];
+                setTimeout(() => {
+                    span.style.transform = "translateY(-80px) scale(0.5)";
+                    span.style.opacity = "0.3";
+                    setTimeout(() => {
+                        span.style.transform = "translateY(0) scale(1.2)";
+                        span.style.opacity = "1";
+                        spawnParticlesAt(span, 6);
+                        animateParticles();
+                        setTimeout(() => {
+                            span.style.transform = "translateY(0) scale(1)";
+                        }, 200);
+                    }, 400);
+                }, i * 150);
+            });
+            return "Feuerwerk";
+        }
+
+        // 14: Spirale
+        function effectSpiral() {
+            const spans = container.querySelectorAll("span");
+            let angle = 0;
+            spans.forEach(span => span.style.color = colors[Math.floor(Math.random() * colors.length)]);
+            colorInterval = setInterval(() => {
+                spans.forEach((span, i) => {
+                    const a = angle + (i * (360 / spans.length));
+                    const rad = a * Math.PI / 180;
+                    const x = Math.cos(rad) * 15;
+                    const y = Math.sin(rad) * 15;
+                    span.style.transform = `translate(${x}px, ${y}px) rotate(${a}deg)`;
+                    span.style.color = colors[(i + Math.floor(angle / 30)) % colors.length];
+                });
+                angle += 5;
+            }, 30);
+            return "Spirale";
+        }
+
+        const effects = [
+            effectRainbowDance, effectParticles, effectWave, effectShake,
+            effectFlipGlow, effectEqualizer, effectGlitch, effectMatrix,
+            effectGravityDrop, effectTypewriter, effectDomino, effectMagnetic,
+            effectFirework, effectSpiral
+        ];
+
+        function triggerEffect() {
+            resetAll();
+            const effect = effects[Math.floor(Math.random() * effects.length)];
+            const name = effect();
+            effectLabel.textContent = name;
+        }
+
+        // Particle system
+        function spawnParticles(count) {
+            const spans = container.querySelectorAll("span");
+            spans.forEach(span => spawnParticlesAt(span, count));
+        }
+
+        function spawnParticlesAt(span, count) {
+            const rect = span.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: cx,
+                    y: cy,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10 - 4,
+                    life: 1,
+                    decay: 0.012 + Math.random() * 0.01,
+                    size: 2 + Math.random() * 5,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.12;
+                p.life -= p.decay;
+                if (p.life > 0) {
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+            particles = particles.filter(p => p.life > 0);
+            if (particles.length > 0) {
+                requestAnimationFrame(animateParticles);
+            }
+        }
+    </script>
+</body>
+</html>

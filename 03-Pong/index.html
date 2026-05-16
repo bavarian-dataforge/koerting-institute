@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong – Koerting Institute</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #151A1D;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .title {
+            color: #c4d600;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+
+        .subtitle {
+            color: #ABAEB0;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
+        }
+
+        .game-wrapper {
+            position: relative;
+        }
+
+        canvas {
+            background-color: #0d1113;
+            border: 2px solid #4c5356;
+            border-radius: 4px;
+            box-shadow: 0 0 30px rgba(196, 214, 0, 0.15);
+            display: block;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 17, 19, 0.92);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            text-align: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay h2 {
+            color: #c4d600;
+            font-size: 2.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .overlay p {
+            color: #ABAEB0;
+            font-size: 0.9rem;
+            max-width: 320px;
+            line-height: 1.6;
+        }
+
+        .mode-select {
+            display: flex;
+            gap: 0.6rem;
+            margin: 0.5rem 0;
+        }
+
+        .mode-btn {
+            background-color: transparent;
+            color: #ABAEB0;
+            border: 1px solid #4c5356;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.05em;
+        }
+
+        .mode-btn:hover {
+            border-color: #c4d600;
+            color: #fff;
+        }
+
+        .mode-btn.active {
+            background-color: #c4d600;
+            color: #151A1D;
+            border-color: #c4d600;
+        }
+
+        .btn {
+            background-color: #c4d600;
+            color: #151A1D;
+            border: none;
+            padding: 0.8rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            letter-spacing: 0.05em;
+        }
+
+        .btn:hover {
+            background-color: #d8eb1a;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .controls {
+            color: #ABAEB0;
+            font-size: 0.8rem;
+            text-align: center;
+            line-height: 1.8;
+            margin-top: 0.5rem;
+        }
+
+        .controls kbd {
+            background-color: #4c5356;
+            color: #fff;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">PONG</div>
+        <div class="subtitle">Koerting Institute</div>
+    </div>
+
+    <div class="game-wrapper">
+        <canvas id="game" width="800" height="500"></canvas>
+        <div class="overlay" id="overlay">
+            <h2 id="overlayTitle">PONG</h2>
+            <p id="overlayText">Wähle einen Modus und leg los.</p>
+            <div class="mode-select">
+                <button class="mode-btn active" data-mode="ai">1 Spieler</button>
+                <button class="mode-btn" data-mode="pvp">2 Spieler</button>
+            </div>
+            <button class="btn" id="startBtn">Start</button>
+        </div>
+    </div>
+
+    <div class="controls" id="controlsHint">
+        <kbd>↑</kbd> <kbd>↓</kbd> Spieler &nbsp;·&nbsp; <kbd>P</kbd> Pause
+    </div>
+
+    <script>
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const W = canvas.width;
+        const H = canvas.height;
+
+        const overlay = document.getElementById("overlay");
+        const overlayTitle = document.getElementById("overlayTitle");
+        const overlayText = document.getElementById("overlayText");
+        const startBtn = document.getElementById("startBtn");
+        const controlsHint = document.getElementById("controlsHint");
+        const modeBtns = document.querySelectorAll(".mode-btn");
+
+        const PADDLE_W = 12;
+        const PADDLE_H = 90;
+        const BALL_SIZE = 12;
+        const WIN_SCORE = 7;
+
+        let mode = "ai"; // "ai" oder "pvp"
+        let running = false;
+        let paused = false;
+        let gameOver = false;
+
+        let leftY, rightY, ballX, ballY, ballVX, ballVY;
+        let scoreL = 0, scoreR = 0;
+        let speed = 6;
+
+        const keys = {};
+
+        function reset(direction = 1) {
+            ballX = W / 2;
+            ballY = H / 2;
+            speed = 6;
+            const angle = (Math.random() * 0.6 - 0.3); // -0.3 bis 0.3 rad
+            ballVX = Math.cos(angle) * speed * direction;
+            ballVY = Math.sin(angle) * speed;
+        }
+
+        function init() {
+            leftY = H / 2 - PADDLE_H / 2;
+            rightY = H / 2 - PADDLE_H / 2;
+            scoreL = 0;
+            scoreR = 0;
+            reset(Math.random() > 0.5 ? 1 : -1);
+            running = true;
+            paused = false;
+            gameOver = false;
+            overlay.classList.add("hidden");
+            updateControlsHint();
+        }
+
+        function updateControlsHint() {
+            if (mode === "pvp") {
+                controlsHint.innerHTML = '<kbd>W</kbd> <kbd>S</kbd> Links &nbsp;·&nbsp; <kbd>↑</kbd> <kbd>↓</kbd> Rechts &nbsp;·&nbsp; <kbd>P</kbd> Pause';
+            } else {
+                controlsHint.innerHTML = '<kbd>↑</kbd> <kbd>↓</kbd> Spieler &nbsp;·&nbsp; <kbd>P</kbd> Pause';
+            }
+        }
+
+        function update() {
+            if (!running || paused || gameOver) return;
+
+            // Linker Paddle (Spieler in PVP / Spieler in AI-Modus = links)
+            if (mode === "pvp") {
+                if (keys["w"] || keys["W"]) leftY -= 7;
+                if (keys["s"] || keys["S"]) leftY += 7;
+            } else {
+                if (keys["ArrowUp"]) leftY -= 7;
+                if (keys["ArrowDown"]) leftY += 7;
+            }
+
+            // Rechter Paddle
+            if (mode === "pvp") {
+                if (keys["ArrowUp"]) rightY -= 7;
+                if (keys["ArrowDown"]) rightY += 7;
+            } else {
+                // KI
+                const target = ballY - PADDLE_H / 2;
+                const diff = target - rightY;
+                const aiSpeed = 5;
+                if (Math.abs(diff) > aiSpeed) {
+                    rightY += Math.sign(diff) * aiSpeed;
+                } else {
+                    rightY = target;
+                }
+            }
+
+            leftY = Math.max(0, Math.min(H - PADDLE_H, leftY));
+            rightY = Math.max(0, Math.min(H - PADDLE_H, rightY));
+
+            // Ball
+            ballX += ballVX;
+            ballY += ballVY;
+
+            // Wand oben/unten
+            if (ballY <= 0) {
+                ballY = 0;
+                ballVY = -ballVY;
+            }
+            if (ballY + BALL_SIZE >= H) {
+                ballY = H - BALL_SIZE;
+                ballVY = -ballVY;
+            }
+
+            // Kollision links
+            if (ballX <= PADDLE_W &&
+                ballY + BALL_SIZE >= leftY &&
+                ballY <= leftY + PADDLE_H &&
+                ballVX < 0) {
+                const hitPos = (ballY + BALL_SIZE / 2 - leftY) / PADDLE_H;
+                const angle = (hitPos - 0.5) * Math.PI * 0.7;
+                speed = Math.min(speed + 0.4, 14);
+                ballVX = Math.cos(angle) * speed;
+                ballVY = Math.sin(angle) * speed;
+                ballX = PADDLE_W;
+            }
+
+            // Kollision rechts
+            if (ballX + BALL_SIZE >= W - PADDLE_W &&
+                ballY + BALL_SIZE >= rightY &&
+                ballY <= rightY + PADDLE_H &&
+                ballVX > 0) {
+                const hitPos = (ballY + BALL_SIZE / 2 - rightY) / PADDLE_H;
+                const angle = (hitPos - 0.5) * Math.PI * 0.7;
+                speed = Math.min(speed + 0.4, 14);
+                ballVX = -Math.cos(angle) * speed;
+                ballVY = Math.sin(angle) * speed;
+                ballX = W - PADDLE_W - BALL_SIZE;
+            }
+
+            // Punkt
+            if (ballX < -BALL_SIZE) {
+                scoreR++;
+                checkWin();
+                if (!gameOver) reset(1);
+            }
+            if (ballX > W) {
+                scoreL++;
+                checkWin();
+                if (!gameOver) reset(-1);
+            }
+        }
+
+        function checkWin() {
+            if (scoreL >= WIN_SCORE || scoreR >= WIN_SCORE) {
+                gameOver = true;
+                running = false;
+                overlayTitle.textContent = "Game Over";
+                let winner;
+                if (mode === "pvp") {
+                    winner = scoreL > scoreR ? "Spieler Links gewinnt!" : "Spieler Rechts gewinnt!";
+                } else {
+                    winner = scoreL > scoreR ? "Du gewinnst!" : "KI gewinnt!";
+                }
+                overlayText.textContent = `${winner}  (${scoreL} : ${scoreR})`;
+                startBtn.textContent = "Nochmal";
+                overlay.classList.remove("hidden");
+            }
+        }
+
+        function draw() {
+            // Hintergrund
+            ctx.fillStyle = "#0d1113";
+            ctx.fillRect(0, 0, W, H);
+
+            // Mittellinie
+            ctx.strokeStyle = "#4c5356";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 12]);
+            ctx.beginPath();
+            ctx.moveTo(W / 2, 0);
+            ctx.lineTo(W / 2, H);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Score
+            ctx.fillStyle = "#ABAEB0";
+            ctx.font = "bold 60px system-ui, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(scoreL, W / 4, 80);
+            ctx.fillText(scoreR, 3 * W / 4, 80);
+
+            // Paddles
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, leftY, PADDLE_W, PADDLE_H);
+            ctx.fillRect(W - PADDLE_W, rightY, PADDLE_W, PADDLE_H);
+
+            // Ball mit Glow
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#c4d600";
+            ctx.fillStyle = "#c4d600";
+            ctx.fillRect(ballX, ballY, BALL_SIZE, BALL_SIZE);
+            ctx.shadowBlur = 0;
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        function togglePause() {
+            if (!running || gameOver) return;
+            paused = !paused;
+            if (paused) {
+                overlayTitle.textContent = "Pause";
+                overlayText.textContent = "Drücke P zum Fortsetzen";
+                startBtn.textContent = "Weiter";
+                overlay.classList.remove("hidden");
+            } else {
+                overlay.classList.add("hidden");
+            }
+        }
+
+        document.addEventListener("keydown", (e) => {
+            keys[e.key] = true;
+            if (e.key === "p" || e.key === "P") togglePause();
+            if (["ArrowUp", "ArrowDown", " "].includes(e.key)) e.preventDefault();
+        });
+
+        document.addEventListener("keyup", (e) => {
+            keys[e.key] = false;
+        });
+
+        modeBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                modeBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                mode = btn.dataset.mode;
+                updateControlsHint();
+            });
+        });
+
+        startBtn.addEventListener("click", () => {
+            if (paused) {
+                togglePause();
+            } else {
+                init();
+            }
+        });
+
+        // Initial Render
+        leftY = H / 2 - PADDLE_H / 2;
+        rightY = H / 2 - PADDLE_H / 2;
+        ballX = W / 2 - BALL_SIZE / 2;
+        ballY = H / 2 - BALL_SIZE / 2;
+        ballVX = 0;
+        ballVY = 0;
+        draw();
+        loop();
+    </script>
+</body>
+</html>
