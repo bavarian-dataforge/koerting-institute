@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APIs sind tot – DAS verändert jetzt ALLES</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #f59e0b;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --gray: #64748b;
+            --light: #f8fafc;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-light) 50%, #312e81 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            letter-spacing: 0.05em;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent), #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: clamp(1.125rem, 2vw, 1.375rem);
+            color: #94a3b8;
+            max-width: 650px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.125rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .hero-cta:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #64748b;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Sections */
+        section {
+            padding: 6rem 2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .section-text {
+            font-size: 1.125rem;
+            color: var(--gray);
+            max-width: 700px;
+            line-height: 1.8;
+        }
+
+        /* Problem Section */
+        .problem {
+            background: var(--light);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Breakthroughs */
+        .breakthroughs {
+            background: var(--white);
+        }
+
+        .breakthrough-list {
+            margin-top: 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+        }
+
+        .breakthrough-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .breakthrough-number {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .breakthrough-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--dark);
+        }
+
+        .breakthrough-content p {
+            color: var(--gray);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 0.375rem 0.875rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Benchmark Section */
+        .benchmark {
+            background: var(--dark);
+            color: var(--white);
+        }
+
+        .benchmark .section-label {
+            color: var(--accent);
+        }
+
+        .benchmark .section-title {
+            color: var(--white);
+        }
+
+        .benchmark .section-text {
+            color: #94a3b8;
+        }
+
+        .benchmark-visual {
+            margin-top: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            width: 120px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            flex-shrink: 0;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 40px;
+            background: var(--dark-light);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: width 1s ease;
+        }
+
+        .bar-fill.ai {
+            background: linear-gradient(90deg, var(--primary), #818cf8);
+            width: 80%;
+        }
+
+        .bar-fill.human {
+            background: linear-gradient(90deg, var(--accent), #fbbf24);
+            width: 72%;
+        }
+
+        /* Reverse Engineering Section */
+        .reverse-eng {
+            background: var(--light);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .comparison-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .comparison-card.highlight {
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+        }
+
+        .comparison-card h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-card.highlight h4 {
+            color: var(--primary);
+        }
+
+        .comparison-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .comparison-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--gray);
+        }
+
+        .comparison-list li::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .comparison-card:not(.highlight) .comparison-list li::before {
+            background: #e2e8f0;
+        }
+
+        .comparison-card.highlight .comparison-list li::before {
+            background: var(--primary);
+        }
+
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, var(--dark) 0%, #312e81 100%);
+            text-align: center;
+            padding: 8rem 2rem;
+        }
+
+        .cta .section-title {
+            color: var(--white);
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .cta p {
+            color: #94a3b8;
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: #64748b;
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.875rem;
+            border-top: 1px solid var(--dark-light);
+        }
+
+        footer a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--white);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            section {
+                padding: 4rem 1.5rem;
+            }
+
+            .breakthrough-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .breakthrough-number {
+                width: 48px;
+                height: 48px;
+                font-size: 1.25rem;
+            }
+
+            .bar-label {
+                width: 80px;
+                font-size: 0.8rem;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .cta {
+                padding: 5rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-badge">Leonard Schmedding &middot; Everlast AI</span>
+            <h1>APIs sind tot: <span>DAS verändert jetzt ALLES</span></h1>
+            <p>Der größte Umbruch in der Prozessautomatisierung seit 20 Jahren &ndash; und drei Durchbrüche, die du kennen musst.</p>
+            <a href="#problem" class="hero-cta">
+                Mehr erfahren
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+            </a>
+        </div>
+        <div class="scroll-indicator">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </div>
+    </section>
+
+    <!-- Problem -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <span class="section-label">Das Problem</span>
+            <h2 class="section-title">Keine API? Keine Automation.</h2>
+            <p class="section-text">
+                Im deutschsprachigen Raum bieten rund 42% aller Softwareanbieter keine öffentlichen API-Schnittstellen an. Das Ergebnis: KI Use Cases bei Voice Agents, Chatbots und Workflows lassen sich nicht umsetzen &ndash; und Unternehmen verlieren Millionen an Automatisierungspotenzial.
+            </p>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-number">42%</div>
+                    <div class="stat-label">der Softwareanbieter ohne öffentliche API</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Schnittstellen bei vielen ERP/CRM-Systemen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">Mio. &euro;</div>
+                    <div class="stat-label">verlorenes Automatisierungspotenzial</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Breakthroughs -->
+    <section class="breakthroughs" id="breakthroughs">
+        <div class="container">
+            <span class="section-label">Die Lösung</span>
+            <h2 class="section-title">Drei Durchbrüche, die alles ändern</h2>
+            <p class="section-text">
+                Dank KI gibt es jetzt Mittel und Wege, Prozesse zu automatisieren &ndash; ganz ohne öffentliche API-Schnittstellen.
+            </p>
+
+            <div class="breakthrough-list">
+                <!-- Breakthrough 1 -->
+                <div class="breakthrough-item">
+                    <div class="breakthrough-number">1</div>
+                    <div class="breakthrough-content">
+                        <h3>Browser Use &amp; Browser Automation</h3>
+                        <p>
+                            KI-Modelle können heute den Browser bedienen wie ein Mensch. Auf der OS-World-Benchmark erreichen sie bereits 80% &ndash; der Mensch liegt bei 72%. Das bedeutet: KI-Agenten navigieren Websites, füllen Formulare aus und führen Aufgaben aus, komplett ohne API.
+                        </p>
+                        <p>
+                            Mit Frameworks wie Browser Use oder Selenium Base (Headless-Modus) laufen Automationen im Hintergrund, während du weiterarbeitest. OpenAI hat eigens dafür das Unternehmen "Software Applications Inc." (hinter Sky) akquiriert.
+                        </p>
+                        <div class="tag-list">
+                            <span class="tag">Browser Use</span>
+                            <span class="tag">Selenium Base</span>
+                            <span class="tag">Playwright</span>
+                            <span class="tag">CDP Protocol</span>
+                            <span class="tag">Headless Browser</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Breakthrough 2 -->
+                <div class="breakthrough-item">
+                    <div class="breakthrough-number">2</div>
+                    <div class="breakthrough-content">
+                        <h3>Computer Use &amp; Desktop Automation</h3>
+                        <p>
+                            Viele Mittelstands-Software-Tools laufen nicht im Browser, sondern als lokale Desktop-Anwendungen. Computer Use löst genau dieses Problem: KI-Agenten bedienen auch native Desktop-Programme, die keine Web-Oberfläche haben.
+                        </p>
+                        <p>
+                            Die Zukunft liegt in agentenoptimierten Browsern (Atlas von OpenAI, Browser Use Desktop) &ndash; grundlegend neu gedacht für eine KI-gesteuerte Welt.
+                        </p>
+                        <div class="tag-list">
+                            <span class="tag">Computer Use</span>
+                            <span class="tag">Desktop Apps</span>
+                            <span class="tag">Atlas Browser</span>
+                            <span class="tag">Native Automation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Breakthrough 3 -->
+                <div class="breakthrough-item">
+                    <div class="breakthrough-number">3</div>
+                    <div class="breakthrough-content">
+                        <h3>Reverse Engineering interner APIs</h3>
+                        <p>
+                            Jede Webapp basiert intern auf APIs &ndash; sie werden nur nicht öffentlich gemacht. Die Lösung: Mit KI-Agenten diese internen APIs reverse-engineeren. Ein akademisches Paper der National University of Singapore zeigt eine 100% Erfolgsrate auf 94 getesteten Domains.
+                        </p>
+                        <p>
+                            Der Vorteil gegenüber Browser Automation: 3,5x schneller, 40x weniger Token-Verbrauch und 100x günstiger. Was du als Nutzer in der Oberfläche tun darfst, darfst du auch über die interne API automatisieren.
+                        </p>
+                        <div class="tag-list">
+                            <span class="tag">Internal APIs</span>
+                            <span class="tag">100% Erfolgsrate</span>
+                            <span class="tag">3.5x schneller</span>
+                            <span class="tag">100x günstiger</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benchmark -->
+    <section class="benchmark">
+        <div class="container">
+            <span class="section-label">Die Zahlen</span>
+            <h2 class="section-title">KI schlägt den Menschen &ndash; bei Browser-Aufgaben</h2>
+            <p class="section-text">
+                Auf der OS-World-Benchmark (369 echte Desktop-Aufgaben auf Ubuntu, Windows, macOS) übertreffen die neuesten KI-Modelle bereits die menschliche Leistung.
+            </p>
+            <div class="benchmark-visual">
+                <div class="bar-item">
+                    <span class="bar-label">KI-Modelle</span>
+                    <div class="bar-track">
+                        <div class="bar-fill ai">80%</div>
+                    </div>
+                </div>
+                <div class="bar-item">
+                    <span class="bar-label">Mensch</span>
+                    <div class="bar-track">
+                        <div class="bar-fill human">72%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reverse Engineering Details -->
+    <section class="reverse-eng">
+        <div class="container">
+            <span class="section-label">Vergleich</span>
+            <h2 class="section-title">Reverse Engineering vs. Browser Automation</h2>
+            <p class="section-text">
+                Das akademische Paper zeigt eindeutig: Interne APIs zu nutzen ist dem reinen Browser-Klicken in allen Metriken überlegen.
+            </p>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>Browser Automation</h4>
+                    <ul class="comparison-list">
+                        <li>Token-intensiv &amp; langsam</li>
+                        <li>Bricht bei Website-Änderungen</li>
+                        <li>Bot-Erkennung möglich</li>
+                        <li>Nicht immer 100% zuverlässig</li>
+                        <li>Höhere laufende Kosten</li>
+                    </ul>
+                </div>
+                <div class="comparison-card highlight">
+                    <h4>Reverse Engineered APIs</h4>
+                    <ul class="comparison-list">
+                        <li>3,5x schneller als Browser Automation</li>
+                        <li>40x weniger Token-Verbrauch</li>
+                        <li>100x günstiger im Betrieb</li>
+                        <li>100% Erfolgsrate (94 Domains)</li>
+                        <li>Robuster bei Änderungen</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <h2 class="section-title">Bereit für Automation ohne API-Grenzen?</h2>
+            <p>
+                Ob Unternehmer, Führungskraft oder KI-Agentur &ndash; diese Durchbrüche eröffnen völlig neue Möglichkeiten für den deutschen Mittelstand.
+            </p>
+            <div class="cta-buttons">
+                <a href="https://youtu.be/39-gX1UKXBw?si=JgN2WVPOzJTP8pub" class="btn btn-primary" target="_blank" rel="noopener">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    Video ansehen
+                </a>
+                <a href="#problem" class="btn btn-secondary">
+                    Nochmal lesen
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Basierend auf dem Video von <a href="https://youtu.be/39-gX1UKXBw?si=JgN2WVPOzJTP8pub" target="_blank" rel="noopener">Leonard Schmedding / Everlast AI</a></p>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
